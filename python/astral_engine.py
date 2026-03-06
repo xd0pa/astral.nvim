@@ -40,7 +40,7 @@ def get_file_at_ref(filepath, ref):
         return None
     return result.stdout
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="astral semantic diff engine")
     parser.add_argument("--file", required=True, help="path to the file to diff")
     parser.add_argument("--ref", required=True, help="git ref to diff against")
