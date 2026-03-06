@@ -17,7 +17,7 @@ class SemanticEvent:
     description: str  # human readable description of what changed
 
 
-def extract_functions(source: str) -> dict:
+def extract_functions(source: str, include_private: bool = False) -> dict:
     """
     Parse a Python source string and extract all function definitions.
     Returns a dict like: { "function_name": FunctionDef_node }
@@ -107,16 +107,20 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
         changes.append("decorators changed")
 
     # Check if return annotation changed
-    old_return = (
-        cst.parse_module("").code_for_node(old_func.returns)
-        if old_func.returns
-        else None
-    )
-    new_return = (
-        cst.parse_module("").code_for_node(new_func.returns)
-        if new_func.returns
-        else None
-    )
+    try:
+        old_return = (
+            cst.parse_module("").code_for_node(old_func.returns.annotation)
+            if old_func.returns
+            else None
+        )
+        new_return = (
+            cst.parse_module("").code_for_node(new_func.returns.annotation)
+            if new_func.returns
+            else None
+        )
+    except Exception:
+        old_return = None
+        new_return = None
 
     if old_return != new_return:
         changes.append(f"return type changed: {old_return} → {new_return}")
@@ -134,6 +138,7 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
 
     return ", ".join(changes)
 
+
 def diff(old_source: str, new_source: str) -> list:
     """
     Main entry point for the diff engine.
@@ -144,4 +149,6 @@ def diff(old_source: str, new_source: str) -> list:
 
     events = diff_functions(old_functions, new_functions)
 
-    return [{"type": e.type, "name": e.name, "description": e.description} for e in events]
+    return [
+        {"type": e.type, "name": e.name, "description": e.description} for e in events
+    ]
