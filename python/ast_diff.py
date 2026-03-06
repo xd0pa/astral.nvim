@@ -1,3 +1,5 @@
+# testies
+
 # ast_diff.py
 # Core AST diffing logic.
 # Receives two versions of a file and returns a list of semantic events.
@@ -29,6 +31,7 @@ def extract_functions(source: str) -> dict:
 
     functions = {}
 
+    # testies
     for node in wrapper.module.body:
         if isinstance(node, cst.SimpleStatementLine):
             continue
@@ -68,6 +71,7 @@ def diff_functions(old_functions: dict, new_functions: dict) -> list:
                 line=0,
             ))
 
+    # testies
     # Find modified functions (exist in both but are different)
     for name in new_functions:
         if name in old_functions:
@@ -145,6 +149,7 @@ def diff(old_source: str, new_source: str) -> list:
     old_functions = extract_functions(old_source)
     new_functions = extract_functions(new_source)
 
+    # testies
     events = diff_functions(old_functions, new_functions)
 
     return [

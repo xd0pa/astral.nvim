@@ -23,6 +23,7 @@ function M.run(args)
 		current_index = 1
 		vim.schedule(function()
 			M.show_events(ref)
+			M.register_keymaps()
 		end)
 	end)
 end
@@ -34,6 +35,38 @@ function M.show_events(ref)
 	end
 
 	require("astral.ui").show(events, ref)
+end
+
+function M.register_keymaps()
+	local config = require("astral.config").options
+
+	vim.keymap.set("n", config.keymaps.next_event, function()
+		if #events == 0 then
+			vim.notify("astral: no events loaded, run :SemanticDiff first", vim.log.levels.WARN)
+			return
+		end
+		current_index = (current_index % #events) + 1
+		local event = events[current_index]
+		if event.line and event.line > 0 then
+			local win = vim.fn.win_getid(vim.fn.winnr("#"))
+			vim.api.nvim_win_set_cursor(win, { event.line, 0 })
+			vim.cmd("normal! zz")
+		end
+	end, { silent = true, desc = "astral: next semantic event" })
+
+	vim.keymap.set("n", config.keymaps.prev_event, function()
+		if #events == 0 then
+			vim.notify("astral: no events loaded, run :SemanticDiff first", vim.log.levels.WARN)
+			return
+		end
+		current_index = ((current_index - 2) % #events) + 1
+		local event = events[current_index]
+		if event.line and event.line > 0 then
+			local win = vim.fn.win_getid(vim.fn.winnr("#"))
+			vim.api.nvim_win_set_cursor(win, { event.line, 0 })
+			vim.cmd("normal! zz")
+		end
+	end, { silent = true, desc = "astral: previous semantic event" })
 end
 
 return M

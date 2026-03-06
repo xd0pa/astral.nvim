@@ -7,8 +7,8 @@ local M = {}
 M.defaults = {
   default_ref = "HEAD~1",
   keymaps = {
-    next_event = "]s",
-    prev_event = "[s",
+    next_event = "<A-n>",
+    prev_event = "<A-p>",
     close = "q",
   },
   ui_style = "split",
