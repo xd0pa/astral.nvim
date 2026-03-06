@@ -1,42 +1,43 @@
-# temporary comment for testing
-
 # ast_diff.py
 # Core AST diffing logic.
 # Receives two versions of a file and returns a list of semantic events.
 
 from dataclasses import dataclass
-from typing import Optional
-
 import libcst as cst
+import libcst.metadata
 
 
 @dataclass
 class SemanticEvent:
     """Represents a single semantic change between two versions of a file."""
-
-    type: str  # ADDED, REMOVED, MODIFIED
-    name: str  # name of the funciton/class that changed
-    description: str  # human readable description of what changed
+    type: str           # ADDED, REMOVED, MODIFIED
+    name: str           # name of the function/class that changed
+    description: str    # human readable description of what changed
+    line: int = 0       # line number in the current file
 
 
 def extract_functions(source: str) -> dict:
     """
     Parse a Python source string and extract all function definitions.
-    Returns a dict like: { "function_name": FunctionDef_node }
+    Returns a dict like: { "function_name": {"node": ..., "line": ...} }
     """
     try:
-        tree = cst.parse_module(source)
+        wrapper = cst.metadata.MetadataWrapper(cst.parse_module(source))
+        positions = wrapper.resolve(cst.metadata.PositionProvider)
     except cst.ParserSyntaxError:
         return {}
 
     functions = {}
 
-    for node in tree.body:
+    for node in wrapper.module.body:
         if isinstance(node, cst.SimpleStatementLine):
             continue
         if isinstance(node, cst.FunctionDef):
             name = node.name.value
-            functions[name] = node
+            functions[name] = {
+                "node": node,
+                "line": positions[node].start.line,
+            }
 
     return functions
 
@@ -50,36 +51,38 @@ def diff_functions(old_functions: dict, new_functions: dict) -> list:
     # Find added functions (exist in new but not in old)
     for name in new_functions:
         if name not in old_functions:
-            events.append(
-                SemanticEvent(
-                    type="ADDED", name=name, description=f"new function added"
-                )
-            )
+            events.append(SemanticEvent(
+                type="ADDED",
+                name=name,
+                description="new function added",
+                line=new_functions[name]["line"],
+            ))
 
     # Find removed functions (exist in old but not in new)
     for name in old_functions:
         if name not in new_functions:
-            events.append(
-                SemanticEvent(
-                    type="REMOVED", name=name, description=f"function was removed"
-                )
-            )
+            events.append(SemanticEvent(
+                type="REMOVED",
+                name=name,
+                description="function was removed",
+                line=0,
+            ))
 
     # Find modified functions (exist in both but are different)
     for name in new_functions:
         if name in old_functions:
-            old_code = cst.parse_module("").code_for_node(old_functions[name])
-            new_code = cst.parse_module("").code_for_node(new_functions[name])
+            old_code = cst.parse_module("").code_for_node(old_functions[name]["node"])
+            new_code = cst.parse_module("").code_for_node(new_functions[name]["node"])
             if old_code != new_code:
-                events.append(
-                    SemanticEvent(
-                        type="MODIFIED",
-                        name=name,
-                        description=detect_change(
-                            old_functions[name], new_functions[name]
-                        ),
-                    )
-                )
+                events.append(SemanticEvent(
+                    type="MODIFIED",
+                    name=name,
+                    description=detect_change(
+                        old_functions[name]["node"],
+                        new_functions[name]["node"]
+                    ),
+                    line=new_functions[name]["line"],
+                ))
 
     return events
 
@@ -98,12 +101,8 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
         changes.append(f"signature changed: {old_params} → {new_params}")
 
     # Check if decorators changed
-    old_decorators = [
-        cst.parse_module("").code_for_node(d) for d in old_func.decorators
-    ]
-    new_decorators = [
-        cst.parse_module("").code_for_node(d) for d in new_func.decorators
-    ]
+    old_decorators = [cst.parse_module("").code_for_node(d) for d in old_func.decorators]
+    new_decorators = [cst.parse_module("").code_for_node(d) for d in new_func.decorators]
 
     if old_decorators != new_decorators:
         changes.append("decorators changed")
@@ -112,13 +111,11 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
     try:
         old_return = (
             cst.parse_module("").code_for_node(old_func.returns.annotation)
-            if old_func.returns
-            else None
+            if old_func.returns else None
         )
         new_return = (
             cst.parse_module("").code_for_node(new_func.returns.annotation)
-            if new_func.returns
-            else None
+            if new_func.returns else None
         )
     except Exception:
         old_return = None
@@ -134,7 +131,6 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
     if old_lines != new_lines:
         changes.append(f"body changed: {old_lines} → {new_lines} statements")
 
-    # Generic fallback
     if not changes:
         return "implementation changed"
 
@@ -152,5 +148,11 @@ def diff(old_source: str, new_source: str) -> list:
     events = diff_functions(old_functions, new_functions)
 
     return [
-        {"type": e.type, "name": e.name, "description": e.description} for e in events
+        {
+            "type": e.type,
+            "name": e.name,
+            "description": e.description,
+            "line": e.line,
+        }
+        for e in events
     ]
