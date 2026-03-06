@@ -17,7 +17,7 @@ class SemanticEvent:
     description: str  # human readable description of what changed
 
 
-def extract_functions(source: str, include_private: bool = False) -> dict:
+def extract_functions(source: str) -> dict:
     """
     Parse a Python source string and extract all function definitions.
     Returns a dict like: { "function_name": FunctionDef_node }
