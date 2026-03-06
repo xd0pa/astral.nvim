@@ -24,6 +24,7 @@ function M.run(args)
 		vim.schedule(function()
 			M.show_events(ref)
 			M.register_keymaps()
+      require("astral.session").save(filepath, ref, data)
 		end)
 	end)
 end
