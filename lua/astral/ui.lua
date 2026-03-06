@@ -79,6 +79,23 @@ function M.show(events, ref)
 	vim.keymap.set("n", config.keymaps.close, function()
 		M.close()
 	end, { buffer = state.buf, silent = true })
+
+	-- Jump to event with <CR>
+	vim.keymap.set("n", "<CR>", function()
+		local cursor = vim.api.nvim_win_get_cursor(state.win)
+		local line_idx = cursor[1]
+		-- First 3 lines are header, events start at line 4
+		local event_idx = line_idx - 3
+		if event_idx < 1 or event_idx > #events then
+			return
+		end
+		local event = events[event_idx]
+		if event.line and event.line > 0 then
+			M.close()
+			vim.api.nvim_win_set_cursor(0, { event.line, 0 })
+			vim.cmd("normal! zz")
+		end
+	end, { buffer = state.buf, silent = true })
 end
 
 return M
