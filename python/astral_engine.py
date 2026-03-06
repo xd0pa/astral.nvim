@@ -8,9 +8,14 @@ import json
 import subprocess
 import sys
 
+from ast_diff import diff
+
 def get_file_at_ref(filepath, ref):
     """Get the content of a file at a specific git ref."""
     import os
+
+    # Expand ~ to absolute path
+    filepath = os.path.expanduser(filepath)
 
     # Get the git root directory
     git_root = subprocess.run(
@@ -55,16 +60,14 @@ def main():
         print(json.dumps({"error": f"could not get file at ref: {args.ref}"}))
         sys.exit(1)
 
-    # For now we return a placeholder — ast_diff.py comes next
-    result = [
-        {
-            "type": "PLACEHOLDER",
-            "name": "test_function",
-            "description": "engine is working!"
-        }
-    ]
-
-    print(json.dumps(result))
+    # Run the semantic diff
+    try:
+        result = diff(old_source, current_source)
+        print(json.dumps(result))
+    except Exception as e:
+        import traceback
+        print(json.dumps({"error": traceback.format_exc()}), file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
