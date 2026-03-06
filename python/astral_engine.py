@@ -7,6 +7,8 @@ import argparse
 import json
 import subprocess
 import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ast_diff import diff
 

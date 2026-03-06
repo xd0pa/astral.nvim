@@ -133,3 +133,15 @@ def detect_change(old_func: cst.FunctionDef, new_func: cst.FunctionDef) -> str:
         return "implementation changed"
 
     return ", ".join(changes)
+
+def diff(old_source: str, new_source: str) -> list:
+    """
+    Main entry point for the diff engine.
+    Returns a list of dicts ready to be serialized as JSON.
+    """
+    old_functions = extract_functions(old_source)
+    new_functions = extract_functions(new_source)
+
+    events = diff_functions(old_functions, new_functions)
+
+    return [{"type": e.type, "name": e.name, "description": e.description} for e in events]
