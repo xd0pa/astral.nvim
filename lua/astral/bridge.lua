@@ -13,10 +13,29 @@ local function get_engine_path()
   return plugin_root .. "/python/astral_engine.py"
 end
 
+local function get_python()
+  local config = require("astral.config").options
+  if config.python_path then
+    return vim.fn.expand(config.python_path)
+  end
+
+  -- Auto-detect .venv relative to plugin root
+  local this_file = debug.getinfo(1, "S").source:sub(2)
+  local plugin_root = vim.fn.fnamemodify(this_file, ":h:h:h")
+  local venv_python = plugin_root .. "/python/.venv/bin/python3"
+
+  if vim.fn.executable(venv_python) == 1 then
+    return venv_python
+  end
+
+  -- Fallback to system python3
+  return "python3"
+end
+
 function M.run(filepath, ref, callback)
   local engine = get_engine_path()
   local config = require("astral.config").options
-  local python = vim.fn.expand(config.python_path or "python3")
+  local python = get_python()
 
   vim.system(
     { python, engine, "--file", filepath, "--ref", ref },

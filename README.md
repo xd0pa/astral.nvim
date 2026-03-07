@@ -17,7 +17,7 @@ You can't navigate them, act on them, or build a review session around them from
 
 - AST-aware diffing - understands your code structure, not just text
 - Semantic event list - see `function signature changed`, not `line 42 modified`
-- Keyboard-driven navigation - jump between events with `]s` / `[s`
+- Keyboard-driven navigation - jump between events with `<A-p>` / `<A-n>`
 - Visual timeline - local HTML report, no server, no build step
 - Fully local - no cloud, no telemetry, no AI
 
@@ -39,6 +39,24 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 }
 ```
 
+After installing, run this command inside Neovim to install Python dependencies:
+```
+:AstralInstall
+```
+
+This will automatically create a virtual environment and install all required
+Python packages. You only need to run this once.
+
+## Supported Languages
+
+| Language | Extension |
+|----------|-----------|
+| Python | `.py` |
+| JavaScript | `.js` `.jsx` |
+| TypeScript | `.ts` `.tsx` |
+| Lua | `.lua` |
+
+
 ## Usage
 
 Open any file tracked by git and run:
@@ -57,24 +75,28 @@ You can also pass a specific git ref:
 
 | Key | Action |
 |-----|--------|
-| `]s` | Jump to next semantic event |
-| `[s` | Jump to previous semantic event |
+| `<A-n>` | Jump to next semantic event |
+| `<A-p>` | Jump to previous semantic event |
 | `q` | Close the astral panel |
 
 ## Status
 
 > ⚠️ This plugin is in early development. Expect breaking changes.
 
-Current stage: **MVP in progress**
+Current stage: **MVP complete**
 
 ## Roadmap
 
-- [ ] Core semantic diff engine (Python)
-- [ ] Neovim quickfix integration (Lua)
-- [ ] Event navigation keybindings
-- [ ] Session persistence (`.astral` file)
-- [ ] Multi-file diff support
+- [x] Core semantic diff engine (Python)
+- [x] Neovim floating window UI
+- [x] Event navigation with `<CR>`
+- [x] Keybindings to cycle between events
+- [x] Session persistence (`.astral` file)
+- [x] Auto-load session on startup
+- [x] Multi-language support (Python, JS, TS, Lua)
+- [ ] Visual timeline (`web/timeline.html`)
 - [ ] Telescope integration
+- [ ] Go support
 
 ## License
 
