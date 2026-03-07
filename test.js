@@ -1,5 +1,5 @@
 function saludar(nombre) {
-  console.log("hola " + nombre);
+  console.log("ey " + nombre);
 }
 
 const despedir = (nombre) => {
