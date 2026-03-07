@@ -17,23 +17,33 @@ function M.setup(opts)
 
 	-- Command to install Python dependencies
 	vim.api.nvim_create_user_command("AstralInstall", function()
+		local data_dir = vim.fn.stdpath("data") .. "/astral"
+		local venv_path = data_dir .. "/.venv"
+
 		local this_file = debug.getinfo(1, "S").source:sub(2)
 		local plugin_root = vim.fn.fnamemodify(this_file, ":h:h:h")
-		local python_dir = plugin_root .. "/python"
+		local requirements = plugin_root .. "/python/requirements.txt"
 
 		vim.notify("astral: installing dependencies...", vim.log.levels.INFO)
 
 		vim.system({
 			"bash",
 			"-c",
-			"cd " .. python_dir .. " && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+			"mkdir -p "
+				.. data_dir
+				.. " && python3 -m venv "
+				.. venv_path
+				.. " && "
+				.. venv_path
+				.. "/bin/pip install -r "
+				.. requirements,
 		}, { text = true }, function(result)
 			vim.schedule(function()
 				if result.code ~= 0 then
 					vim.notify("astral: install failed\n" .. result.stderr, vim.log.levels.ERROR)
 					return
 				end
-				vim.notify("astral: dependencies installed successfully!", vim.log.levels.INFO)
+				vim.notify("astral: dependencies installed at " .. venv_path, vim.log.levels.INFO)
 			end)
 		end)
 	end, {
