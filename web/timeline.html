@@ -1,141 +1,276 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>astral.nvim — semantic diff timeline</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>astral.nvim — semantic diff timeline</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    body {
-      background: #1a1b26;
-      color: #c0caf5;
-      font-family: "JetBrains Mono", "Fira Code", monospace;
-      padding: 2rem;
-    }
+      body {
+        background: #1a1b26;
+        color: #c0caf5;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        padding: 0;
+        min-height: 100vh;
+      }
 
-    header {
-      border-bottom: 1px solid #2a2b3d;
-      padding-bottom: 1rem;
-      margin-bottom: 2rem;
-    }
+      nav {
+        background: #16161e;
+        border-bottom: 1px solid #2a2b3d;
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
 
-    header h1 {
-      font-size: 1.2rem;
-      color: #7aa2f7;
-      margin-bottom: 0.3rem;
-    }
+      nav h1 {
+        font-size: 1rem;
+        color: #7aa2f7;
+        letter-spacing: 0.05em;
+      }
 
-    header p {
-      font-size: 0.85rem;
-      color: #565f89;
-    }
+      nav h1 span {
+        color: #565f89;
+        font-weight: normal;
+      }
 
-    .timeline {
-      position: relative;
-      padding-left: 2rem;
-    }
+      .meta {
+        font-size: 0.75rem;
+        color: #565f89;
+      }
 
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 0.4rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #2a2b3d;
-    }
+      .meta strong {
+        color: #c0caf5;
+      }
 
-    .event {
-      position: relative;
-      margin-bottom: 1.5rem;
-      padding: 1rem;
-      border-radius: 8px;
-      border: 1px solid #2a2b3d;
-      background: #1f2030;
-    }
+      .stats {
+        display: flex;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #2a2b3d;
+      }
 
-    .event::before {
-      content: "";
-      position: absolute;
-      left: -1.75rem;
-      top: 1.2rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: currentColor;
-    }
+      .stat {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        background: #1f2030;
+        border: 1px solid #2a2b3d;
+      }
 
-    .event.ADDED    { border-left: 3px solid #9ece6a; color: #9ece6a; }
-    .event.REMOVED  { border-left: 3px solid #f7768e; color: #f7768e; }
-    .event.MODIFIED { border-left: 3px solid #e0af68; color: #e0af68; }
+      .stat.added {
+        border-left: 3px solid #9ece6a;
+      }
+      .stat.removed {
+        border-left: 3px solid #f7768e;
+      }
+      .stat.modified {
+        border-left: 3px solid #e0af68;
+      }
 
-    .event-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.4rem;
-    }
+      .stat .count {
+        font-size: 1.2rem;
+        font-weight: bold;
+        display: block;
+      }
 
-    .event-type {
-      font-size: 0.7rem;
-      font-weight: bold;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      background: currentColor;
-      color: #1a1b26;
-    }
+      .stat.added .count {
+        color: #9ece6a;
+      }
+      .stat.removed .count {
+        color: #f7768e;
+      }
+      .stat.modified .count {
+        color: #e0af68;
+      }
 
-    .event-name {
-      font-size: 0.95rem;
-      color: #c0caf5;
-    }
+      .stat .label {
+        color: #565f89;
+        font-size: 0.7rem;
+      }
 
-    .event-description {
-      font-size: 0.8rem;
-      color: #565f89;
-    }
+      .timeline {
+        padding: 2rem;
+        position: relative;
+      }
 
-    .event-line {
-      font-size: 0.75rem;
-      color: #3b4261;
-      margin-top: 0.3rem;
-    }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 2.9rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #2a2b3d;
+      }
 
-    .empty {
-      text-align: center;
-      color: #565f89;
-      padding: 3rem;
-    }
-  </style>
-</head>
+      .event {
+        position: relative;
+        margin-bottom: 1.2rem;
+        padding: 1rem 1.2rem;
+        border-radius: 8px;
+        border: 1px solid #2a2b3d;
+        background: #1f2030;
+        margin-left: 2rem;
+        transition: border-color 0.2s;
+      }
+
+      .event:hover {
+        border-color: #3b4261;
+      }
+
+      .event::before {
+        content: "";
+        position: absolute;
+        left: -1.6rem;
+        top: 1.1rem;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .event.ADDED::before {
+        background: #9ece6a;
+      }
+      .event.REMOVED::before {
+        background: #f7768e;
+      }
+      .event.MODIFIED::before {
+        background: #e0af68;
+      }
+
+      .event.ADDED {
+        border-left: 3px solid #9ece6a;
+      }
+      .event.REMOVED {
+        border-left: 3px solid #f7768e;
+      }
+      .event.MODIFIED {
+        border-left: 3px solid #e0af68;
+      }
+
+      .event-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .badge {
+        font-size: 0.65rem;
+        font-weight: bold;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+
+      .badge.ADDED {
+        background: #9ece6a;
+        color: #1a1b26;
+      }
+      .badge.REMOVED {
+        background: #f7768e;
+        color: #1a1b26;
+      }
+      .badge.MODIFIED {
+        background: #e0af68;
+        color: #1a1b26;
+      }
+
+      .event-name {
+        font-size: 0.95rem;
+        color: #c0caf5;
+        font-weight: bold;
+      }
+
+      .event-description {
+        font-size: 0.8rem;
+        color: #565f89;
+        margin-top: 0.2rem;
+      }
+
+      .event-line {
+        font-size: 0.7rem;
+        color: #3b4261;
+        margin-top: 0.4rem;
+      }
+
+      .empty {
+        text-align: center;
+        color: #565f89;
+        padding: 4rem;
+        font-size: 0.9rem;
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: #3b4261;
+        font-size: 0.75rem;
+        border-top: 1px solid #2a2b3d;
+      }
+    </style>
+  </head>
 <body>
-  <header>
-    <h1>⬡ astral.nvim</h1>
-    <p id="meta">loading session...</p>
-  </header>
+  <nav>
+    <h1>⬡ astral<span>.nvim</span></h1>
+    <span class="meta" id="meta">loading...</span>
+  </nav>
 
+  <div class="stats" id="stats"></div>
   <div class="timeline" id="timeline"></div>
 
+  <footer>generated by astral.nvim</footer>
+
   <script>
-    // SESSION_DATA will be replaced by astral when generating this file
     const SESSION = __SESSION_DATA__;
 
     const meta = document.getElementById("meta");
+    const stats = document.getElementById("stats");
     const timeline = document.getElementById("timeline");
 
     if (!SESSION || !SESSION.events || SESSION.events.length === 0) {
       meta.textContent = "no session data found";
-      timeline.innerHTML = '<p class="empty">no semantic events to display</p>';
+      timeline.innerHTML = '<p class="empty">no semantic events to display — run :SemanticDiff first</p>';
     } else {
-      meta.textContent = SESSION.filepath + " — diff against " + SESSION.ref;
+      // Header meta
+      const file = SESSION.filepath.split("/").pop();
+      meta.innerHTML = `<strong>${file}</strong> vs ${SESSION.ref}`;
 
-      SESSION.events.forEach((event, i) => {
+      // Count by type
+      const counts = { ADDED: 0, REMOVED: 0, MODIFIED: 0 };
+      SESSION.events.forEach(e => counts[e.type]++);
+
+      stats.innerHTML = `
+        <div class="stat added">
+          <span class="count">${counts.ADDED}</span>
+          <span class="label">added</span>
+        </div>
+        <div class="stat removed">
+          <span class="count">${counts.REMOVED}</span>
+          <span class="label">removed</span>
+        </div>
+        <div class="stat modified">
+          <span class="count">${counts.MODIFIED}</span>
+          <span class="label">modified</span>
+        </div>
+      `;
+
+      // Events
+      SESSION.events.forEach(event => {
         const div = document.createElement("div");
         div.className = "event " + event.type;
         div.innerHTML = `
           <div class="event-header">
-            <span class="event-type">${event.type}</span>
+            <span class="badge ${event.type}">${event.type}</span>
             <span class="event-name">${event.name}</span>
           </div>
           <div class="event-description">${event.description}</div>
@@ -146,4 +281,5 @@
     }
   </script>
 </body>
+</html>
 </html>
