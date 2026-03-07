@@ -73,6 +73,9 @@ def main() -> None:
         elif ext in (".js", ".jsx", ".ts", ".tsx"):
             from ast_diff_js import diff
             result = diff(old_source, current_source)
+        elif ext == ".lua":
+            from ast_diff_lua import diff
+            result = diff(old_source, current_source)
         else:
             print(json.dumps({"error": f"unsupported file type: {ext}"}))
             sys.exit(1)
