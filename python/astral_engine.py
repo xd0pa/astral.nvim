@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from ast_diff import diff
+from ast_diff_python import diff
 
 def get_file_at_ref(filepath, ref):
     """Get the content of a file at a specific git ref."""
@@ -62,9 +62,20 @@ def main() -> None:
         print(json.dumps({"error": f"could not get file at ref: {args.ref}"}))
         sys.exit(1)
 
+    # Detect language by file extension
+    ext = os.path.splitext(args.file)[1].lower()
+
     # Run the semantic diff
     try:
-        result = diff(old_source, current_source)
+        if ext == ".py":
+            from ast_diff_python import diff
+            result = diff(old_source, current_source)
+        elif ext in (".js", ".jsx", ".ts", ".tsx"):
+            from ast_diff_js import diff
+            result = diff(old_source, current_source)
+        else:
+            print(json.dumps({"error": f"unsupported file type: {ext}"}))
+            sys.exit(1)
         print(json.dumps(result))
     except Exception as e:
         import traceback
