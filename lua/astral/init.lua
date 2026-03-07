@@ -78,8 +78,16 @@ function M.setup(opts)
 		out:write(html)
 		out:close()
 
-		-- Open in browser
-		vim.system({ "xdg-open", tmp }, { text = true })
+		-- Open in browser (cross-platform)
+		local open_cmd
+		if vim.fn.has("mac") == 1 then
+			open_cmd = "open"
+		elseif vim.fn.has("win32") == 1 then
+			open_cmd = "start"
+		else
+			open_cmd = "xdg-open"
+		end
+		vim.system({ open_cmd, tmp }, { text = true })
 		vim.notify("astral: timeline opened in browser", vim.log.levels.INFO)
 	end, {
 		desc = "Open semantic diff timeline in browser",
