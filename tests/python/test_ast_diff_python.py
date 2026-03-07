@@ -114,3 +114,41 @@ def foo(a, b):
     assert any(
         e["type"] == "MODIFIED" and "signature" in e["description"] for e in events
     )
+
+
+def test_diff_returns_list():
+    """diff() should always return a list, never None"""
+    events = diff("", "")
+    assert isinstance(events, list)
+
+
+def test_diff_event_has_required_fields():
+    """Every event must have type, name, description and line"""
+    old = "def foo():\n    pass"
+    new = "def foo():\n    return 1"
+    events = diff(old, new)
+    for event in events:
+        assert "type" in event
+        assert "name" in event
+        assert "description" in event
+        assert "line" in event
+
+
+def test_diff_line_number_is_positive():
+    """Line numbers should always be positive for existing functions"""
+    old = "def foo():\n    pass"
+    new = "def foo():\n    return 1\ndef bar():\n    pass"
+    events = diff(old, new)
+    for event in events:
+        if event["type"] != "REMOVED":
+            assert event["line"] > 0
+
+
+def test_diff_type_values():
+    """Event types should only be ADDED, REMOVED or MODIFIED"""
+    old = "def foo():\n    pass\ndef bar():\n    pass"
+    new = "def foo():\n    return 1\ndef baz():\n    pass"
+    events = diff(old, new)
+    valid_types = {"ADDED", "REMOVED", "MODIFIED"}
+    for event in events:
+        assert event["type"] in valid_types
