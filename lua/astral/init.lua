@@ -93,6 +93,13 @@ function M.setup(opts)
 		desc = "Open semantic diff timeline in browser",
 	})
 
+	-- Command to open Telescope picker with semantic events
+	vim.api.nvim_create_user_command("AstralTelescope", function()
+		require("astral.telescope").open()
+	end, {
+		desc = "Open Telescope picker with semantic events",
+	})
+
 	-- Auto-load session on startup
 	vim.api.nvim_create_autocmd("VimEnter", {
 		callback = function()

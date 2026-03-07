@@ -76,4 +76,8 @@ function M.load_session(session)
 	M.register_keymaps()
 end
 
+function M.get_events()
+  return events
+end
+
 return M
