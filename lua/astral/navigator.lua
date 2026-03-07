@@ -70,4 +70,10 @@ function M.register_keymaps()
 	end, { silent = true, desc = "astral: previous semantic event" })
 end
 
+function M.load_session(session)
+  events = session.events
+  current_index = 1
+  M.register_keymaps()
+end
+
 return M
