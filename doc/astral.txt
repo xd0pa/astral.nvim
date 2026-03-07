@@ -1,0 +1,102 @@
+*astral.txt*    AST-aware semantic diff navigator for Neovim
+
+                                                *astral*
+ASTRAL.NVIM
+
+  Navigate your code changes as semantic events — not line hunks.
+  Instead of seeing what lines changed, you see what concepts changed:
+  function signatures, new symbols, moved blocks, dependency shifts.
+
+================================================================================
+CONTENTS                                                    *astral-contents*
+
+  1. Requirements .............. |astral-requirements|
+  2. Installation .............. |astral-installation|
+  3. Commands .................. |astral-commands|
+  4. Configuration ............. |astral-configuration|
+  5. Keybindings ............... |astral-keybindings|
+  6. Supported Languages ....... |astral-languages|
+
+================================================================================
+REQUIREMENTS                                            *astral-requirements*
+
+  - Neovim >= 0.9
+  - Python >= 3.10
+  - Git
+
+================================================================================
+INSTALLATION                                            *astral-installation*
+
+  Using lazy.nvim: >lua
+    {
+      "xd0pa/astral.nvim",
+      config = function()
+        require("astral").setup()
+      end,
+    }
+
+  After installing, run |:AstralInstall| to install Python dependencies.
+
+================================================================================
+COMMANDS                                                    *astral-commands*
+
+                                                        *:SemanticDiff*
+:SemanticDiff [ref]
+  Run an AST-aware semantic diff against a git ref.
+  If no ref is provided, defaults to HEAD~1.
+
+  Examples: >
+    :SemanticDiff
+    :SemanticDiff HEAD~3
+    :SemanticDiff main
+
+                                                        *:AstralInstall*
+:AstralInstall
+  Install Python dependencies into the Neovim data directory.
+  Run this once after installing the plugin.
+
+                                                        *:AstralTimeline*
+:AstralTimeline
+  Open a visual HTML timeline of the current session in the browser.
+
+                                                        *:AstralTelescope*
+:AstralTelescope
+  Open a Telescope picker with all semantic events.
+  Press <CR> to jump to the event location.
+
+================================================================================
+CONFIGURATION                                          *astral-configuration*
+
+  Pass options to the setup() function: >lua
+    require("astral").setup({
+      default_ref = "HEAD~1",
+      ui_style = "split",
+      python_path = nil,
+      keymaps = {
+        next_event = "<A-n>",
+        prev_event = "<A-p>",
+        close      = "q",
+      },
+    })
+
+================================================================================
+KEYBINDINGS                                              *astral-keybindings*
+
+  <A-n>       Jump to next semantic event
+  <A-p>       Jump to previous semantic event
+  q           Close the astral panel
+  <CR>        Jump to event location (inside astral window)
+
+================================================================================
+SUPPORTED LANGUAGES                                        *astral-languages*
+
+  Language        Extension
+  --------        ---------
+  Python          .py
+  JavaScript      .js  .jsx
+  TypeScript      .ts  .tsx
+  Lua             .lua
+
+================================================================================
+vim:tw=78:ts=8:ft=help:norl:
+

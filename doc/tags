@@ -1,0 +1,12 @@
+:AstralTelescope	astral.txt	/*:AstralTelescope*
+:AstralTimeline	astral.txt	/*:AstralTimeline*
+:SemanticDiff	astral.txt	/*:SemanticDiff*
+astral	astral.txt	/*astral*
+astral-commands	astral.txt	/*astral-commands*
+astral-configuration	astral.txt	/*astral-configuration*
+astral-contents	astral.txt	/*astral-contents*
+astral-installation	astral.txt	/*astral-installation*
+astral-keybindings	astral.txt	/*astral-keybindings*
+astral-languages	astral.txt	/*astral-languages*
+astral-requirements	astral.txt	/*astral-requirements*
+astral.txt	astral.txt	/*astral.txt*
