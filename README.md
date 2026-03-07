@@ -1,7 +1,7 @@
 # ⬡ astral.nvim
 
 <p align="center">
-    <img src="assets/logo.png" width="120" alt="astral.nvim logo">
+    <img src="assets/logo2.png" width="120" alt="astral.nvim logo">
 </p>
 
 > AST-aware semantic diff navigator for Neovim.
