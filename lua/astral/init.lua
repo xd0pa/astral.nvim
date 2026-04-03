@@ -29,14 +29,9 @@ function M.setup(opts)
 		vim.system({
 			"bash",
 			"-c",
-			"mkdir -p "
-				.. data_dir
-				.. " && python3 -m venv "
-				.. venv_path
-				.. " && "
-				.. venv_path
-				.. "/bin/pip install -r "
-				.. requirements,
+			"mkdir -p " .. vim.fn.shellescape(data_dir) ..
+				" && python3 -m venv " .. vim.fn.shellescape(venv_path) ..
+				" && " .. vim.fn.shellescape(venv_path .. "/bin/pip") .. " install -r " .. vim.fn.shellescape(requirements),
 		}, { text = true }, function(result)
 			vim.schedule(function()
 				if result.code ~= 0 then

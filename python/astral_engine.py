@@ -16,8 +16,6 @@ from ast_diff_python import diff
 
 def get_file_at_ref(filepath, ref):
     """Get the content of a file at a specific git ref."""
-    import os
-
     # Expand ~ to absolute path
     filepath = os.path.expanduser(filepath)
 
@@ -66,8 +64,6 @@ def main() -> None:
     old_source = get_file_at_ref(args.file, args.ref)
     if old_source is None:
         # Check if the file is tracked by git at all
-        import subprocess
-
         tracked = subprocess.run(
             ["git", "ls-files", "--error-unmatch", args.file],
             capture_output=True,

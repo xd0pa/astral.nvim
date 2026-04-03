@@ -45,8 +45,8 @@ function M.show(events, ref)
 	-- Close any existing window first
 	M.close()
 
-	-- Create a new empty buffer for out window
-	-- flase = not listed, true = scratch (temporary, no file)
+	-- Create a new empty buffer for our window
+	-- false = not listed, true = scratch (temporary, no file)
 	state.buf = vim.api.nvim_create_buf(false, true)
 
 	-- Build the lines to display

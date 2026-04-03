@@ -49,8 +49,7 @@ function M.register_keymaps()
 		current_index = (current_index % #events) + 1
 		local event = events[current_index]
 		if event.line and event.line > 0 then
-			local win = vim.fn.win_getid(vim.fn.winnr("#"))
-			vim.api.nvim_win_set_cursor(win, { event.line, 0 })
+			vim.api.nvim_win_set_cursor(0, { event.line, 0 })
 			vim.cmd("normal! zz")
 		end
 	end, { silent = true, desc = "astral: next semantic event" })
@@ -63,8 +62,7 @@ function M.register_keymaps()
 		current_index = ((current_index - 2) % #events) + 1
 		local event = events[current_index]
 		if event.line and event.line > 0 then
-			local win = vim.fn.win_getid(vim.fn.winnr("#"))
-			vim.api.nvim_win_set_cursor(win, { event.line, 0 })
+			vim.api.nvim_win_set_cursor(0, { event.line, 0 })
 			vim.cmd("normal! zz")
 		end
 	end, { silent = true, desc = "astral: previous semantic event" })
